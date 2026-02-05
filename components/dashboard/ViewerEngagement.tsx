@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { generateEngagementMetrics } from "@/lib/mock-data/engagement";
 import { DataSourceBadge } from "@/components/shared/DataSourceBadge";
+import { TrendingUp, Clock, Target } from "lucide-react";
 
 export function ViewerEngagement() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -66,6 +67,13 @@ export function ViewerEngagement() {
 
   const maxAbandons = Math.max(...abandonPoints.map(p => p.abandonCount));
 
+  // Calculate engagement score (weighted)
+  const engagementScore = Math.round(
+    (engagementData.completionRate * 0.5) + 
+    ((engagementData.averageWatchTimeSeconds / 1800) * 100 * 0.3) +
+    (70 * 0.2) // Mock interaction score
+  );
+
   return (
     <div ref={sectionRef} className="space-y-6 fade-in">
       <div className="flex items-center justify-between">
@@ -76,86 +84,92 @@ export function ViewerEngagement() {
         <DataSourceBadge source="Video.js VHS" />
       </div>
 
-      {/* Watch Time vs Session Duration */}
-      <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-        <CardHeader>
-          <CardTitle>Watch Time vs Session Duration</CardTitle>
-          <CardDescription>Actual viewing time compared to total session length</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={watchTimeComparison}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="segment" />
-              <YAxis label={{ value: "Minutes", angle: -90, position: "insideLeft" }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-              <Bar dataKey="watchTime" fill="#8884d8" name="Watch Time" />
-              <Bar dataKey="sessionDuration" fill="#82ca9d" name="Session Duration" />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex gap-6 mt-4 justify-center text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8884d8] rounded"></div>
-              <span>Watch Time (actual viewing)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#82ca9d] rounded"></div>
-              <span>Session Duration (total time)</span>
-            </div>
+      {/* TOP: 3 Key Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Completion Rate */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Completion Rate</h3>
+            <Target className="w-5 h-5 text-green-400" />
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{engagementData.completionRate.toFixed(1)}</span>
+            <span className="text-xl text-zinc-400 mb-1">%</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Viewers who reached 100%</p>
+        </div>
 
-      {/* Completion Rate Funnel */}
-      <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-        <CardHeader>
-          <CardTitle>Completion Rate Funnel</CardTitle>
-          <CardDescription>Viewer retention through content lifecycle</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {completionFunnel.map((stage, index) => {
-              const width = stage.percentage;
-              const color = `hsl(${120 - (index * 20)}, 70%, 50%)`;
-              
-              return (
-                <div key={stage.stage} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">{stage.stage}</span>
-                    <span className="text-muted-foreground">
-                      {stage.viewers.toLocaleString()} viewers ({stage.percentage}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-8 relative overflow-hidden">
-                    <div
-                      className="h-full rounded-full flex items-center justify-center text-white font-medium text-sm transition-all"
-                      style={{ width: `${width}%`, backgroundColor: color }}
-                    >
-                      {stage.percentage}%
+        {/* Avg Watch Time */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Avg Watch Time</h3>
+            <Clock className="w-5 h-5 text-blue-400" />
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{(engagementData.averageWatchTimeSeconds / 60).toFixed(1)}</span>
+            <span className="text-xl text-zinc-400 mb-1">min</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Average viewing duration</p>
+        </div>
+
+        {/* Engagement Score */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Engagement Score</h3>
+            <TrendingUp className="w-5 h-5 text-purple-400" />
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{engagementScore}</span>
+            <span className="text-xl text-zinc-400 mb-1">/100</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Composite engagement metric</p>
+        </div>
+      </div>
+
+      {/* MIDDLE: 2-Column Grid */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Completion Rate Funnel */}
+        <Card className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm border-white/10 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+          <CardHeader>
+            <CardTitle>Completion Rate Funnel</CardTitle>
+            <CardDescription>Viewer retention through content lifecycle</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {completionFunnel.map((stage, index) => {
+                const width = stage.percentage;
+                const color = `hsl(${120 - (index * 20)}, 70%, 50%)`;
+                
+                return (
+                  <div key={stage.stage} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-zinc-200">{stage.stage}</span>
+                      <span className="text-zinc-400">
+                        {stage.viewers.toLocaleString()} viewers ({stage.percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-zinc-900 rounded-full h-8 relative overflow-hidden">
+                      <div
+                        className="h-full rounded-full flex items-center justify-center text-white font-medium text-sm transition-all"
+                        style={{ width: `${width}%`, backgroundColor: color }}
+                      >
+                        {stage.percentage}%
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm">
-              <strong>Completion Rate:</strong> {engagementData.completionRate.toFixed(1)}% with avg watch time of {(engagementData.averageWatchTimeSeconds / 60).toFixed(1)} minutes
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })}
+            </div>
+            <div className="mt-6 p-4 bg-zinc-900/50 rounded-lg border border-white/10">
+              <p className="text-sm text-zinc-300">
+                <strong>Completion Rate:</strong> {engagementData.completionRate.toFixed(1)}% with avg watch time of {(engagementData.averageWatchTimeSeconds / 60).toFixed(1)} minutes
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
         {/* Abandon Points Heatmap */}
-        <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+        <Card className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm border-white/10 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
           <CardHeader>
             <CardTitle>Abandon Points Heatmap</CardTitle>
             <CardDescription>Where viewers drop off in content timeline</CardDescription>
@@ -171,12 +185,12 @@ export function ViewerEngagement() {
                 return (
                   <div key={point.timestamp} className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="font-medium">{timeLabel}</span>
-                      <span className="text-muted-foreground">
+                      <span className="font-medium text-zinc-200">{timeLabel}</span>
+                      <span className="text-zinc-400">
                         {point.abandonCount} viewers ({((point.abandonCount / point.totalViewers) * 100).toFixed(1)}%)
                       </span>
                     </div>
-                    <div className="w-full bg-secondary rounded h-6 relative overflow-hidden">
+                    <div className="w-full bg-zinc-900 rounded h-6 relative overflow-hidden">
                       <div
                         className="h-full rounded transition-all"
                         style={{
@@ -189,7 +203,7 @@ export function ViewerEngagement() {
                 );
               })}
             </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="mt-4 flex items-center gap-2 text-xs text-zinc-400">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded" style={{ backgroundColor: "hsl(240, 70%, 50%)" }}></div>
                 <span>Low</span>
@@ -204,9 +218,49 @@ export function ViewerEngagement() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Additional Charts */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Watch Time vs Session Duration */}
+        <Card className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm border-white/10 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+          <CardHeader>
+            <CardTitle>Watch Time vs Session Duration</CardTitle>
+            <CardDescription>Actual viewing time compared to total session length</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={watchTimeComparison}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
+                <XAxis dataKey="segment" tick={{ fill: "#a1a1aa" }} />
+                <YAxis label={{ value: "Minutes", angle: -90, position: "insideLeft", fill: "#a1a1aa" }} tick={{ fill: "#a1a1aa" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(24, 24, 27, 0.95)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "8px",
+                    color: "#fff",
+                  }}
+                />
+                <Bar dataKey="watchTime" fill="#8884d8" name="Watch Time" />
+                <Bar dataKey="sessionDuration" fill="#82ca9d" name="Session Duration" />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="flex gap-6 mt-4 justify-center text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#8884d8] rounded"></div>
+                <span className="text-zinc-300">Watch Time (actual viewing)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-[#82ca9d] rounded"></div>
+                <span className="text-zinc-300">Session Duration (total time)</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Pause Pattern Analysis */}
-        <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+        <Card className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm border-white/10 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
           <CardHeader>
             <CardTitle>Pause Pattern Analysis</CardTitle>
             <CardDescription>Frequency and duration of viewer pauses</CardDescription>
@@ -216,27 +270,29 @@ export function ViewerEngagement() {
               {pausePatterns.map((pattern) => (
                 <div key={pattern.timeRange} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">{pattern.timeRange}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-sm font-medium text-zinc-200">{pattern.timeRange}</span>
+                    <span className="text-xs text-zinc-400">
                       {pattern.pauseCount} pauses
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-muted p-2 rounded">
-                      <div className="text-xs text-muted-foreground">Count</div>
-                      <div className="text-lg font-bold">{pattern.pauseCount}</div>
+                    <div className="bg-zinc-900/50 p-2 rounded border border-white/5">
+                      <div className="text-xs text-zinc-400">Count</div>
+                      <div className="text-lg font-bold text-zinc-100">{pattern.pauseCount}</div>
                     </div>
-                    <div className="bg-muted p-2 rounded">
-                      <div className="text-xs text-muted-foreground">Avg Duration</div>
-                      <div className="text-lg font-bold">{pattern.avgPauseDuration}s</div>
+                    <div className="bg-zinc-900/50 p-2 rounded border border-white/5">
+                      <div className="text-xs text-zinc-400">Avg Duration</div>
+                      <div className="text-lg font-bold text-zinc-100">{pattern.avgPauseDuration}s</div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
-              <strong>Pattern Insight:</strong> Pause duration increases with content progression,
-              suggesting intentional breaks rather than technical issues.
+            <div className="mt-4 p-3 bg-zinc-900/50 rounded-lg text-sm border border-white/10">
+              <strong className="text-zinc-200">Pattern Insight:</strong>{" "}
+              <span className="text-zinc-400">
+                Pause duration increases with content progression, suggesting intentional breaks rather than technical issues.
+              </span>
             </div>
           </CardContent>
         </Card>

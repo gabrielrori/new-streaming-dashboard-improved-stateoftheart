@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shared/card";
 import { Badge } from "@/components/shared/badge";
 import { DataSourceBadge } from "@/components/shared/DataSourceBadge";
 
@@ -187,6 +186,13 @@ export function PlayerHealth() {
   const errorRate = ((vhsStats.errored / vhsStats.requests) * 100).toFixed(2);
   const abortRate = ((vhsStats.aborted / vhsStats.requests) * 100).toFixed(2);
 
+  // Calculate health score (0-100, weighted)
+  const healthScore = Math.round(
+    (100 - droppedFrames.percentage) * 0.4 + // Dropped frames (40% weight)
+    (100 - parseFloat(errorRate)) * 0.3 + // Error rate (30% weight)
+    (startupMetrics.timeToPlayback < 2000 ? 90 : 70) * 0.3 // Startup speed (30% weight)
+  );
+
   return (
     <div ref={sectionRef} className="space-y-6 fade-in">
       <div className="flex items-center justify-between">
@@ -197,211 +203,176 @@ export function PlayerHealth() {
         <DataSourceBadge source="Video.js VHS" />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Dropped Frames Gauge */}
-        <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-          <CardHeader>
-            <CardTitle>Dropped Frames</CardTitle>
-            <CardDescription>Frame rendering performance</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full transform -rotate-90">
-                {/* Background circle */}
-                <circle
-                  cx="96"
-                  cy="96"
-                  r="80"
-                  stroke="hsl(var(--muted))"
-                  strokeWidth="16"
-                  fill="none"
-                />
-                {/* Progress circle */}
-                <circle
-                  cx="96"
-                  cy="96"
-                  r="80"
-                  stroke={getGaugeColor(droppedFrames.percentage)}
-                  strokeWidth="16"
-                  fill="none"
-                  strokeDasharray={`${(droppedFrames.percentage / 100) * 502.65} 502.65`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-4xl font-bold">{droppedFrames.percentage}%</div>
-                <div className="text-sm text-muted-foreground">dropped</div>
-              </div>
+      {/* Large Health Score Gauge at Top */}
+      <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-white/10">
+        <h3 className="text-lg font-semibold text-zinc-100 mb-6 text-center">Overall Player Health Score</h3>
+        <div className="flex justify-center">
+          <div className="relative w-64 h-64">
+            <svg className="w-full h-full transform -rotate-90">
+              {/* Background circle */}
+              <circle
+                cx="128"
+                cy="128"
+                r="110"
+                stroke="rgba(255, 255, 255, 0.1)"
+                strokeWidth="20"
+                fill="none"
+              />
+              {/* Progress circle with gradient */}
+              <circle
+                cx="128"
+                cy="128"
+                r="110"
+                stroke={getGaugeColor(100 - healthScore)}
+                strokeWidth="20"
+                fill="none"
+                strokeDasharray={`${(healthScore / 100) * 691.15} 691.15`}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="text-6xl font-bold text-zinc-100">{healthScore}</div>
+              <div className="text-lg text-zinc-400 mt-2">/ 100</div>
+              <div className="text-sm text-zinc-500 mt-1">Health Score</div>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4 w-full">
-              <div className="text-center">
-                <div className="text-2xl font-bold">{droppedFrames.totalFrames.toLocaleString()}</div>
-                <div className="text-xs text-muted-foreground">Total Frames</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-500">{droppedFrames.droppedFrames}</div>
-                <div className="text-xs text-muted-foreground">Dropped</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-zinc-400">
+            {healthScore >= 90 && "Excellent player performance"}
+            {healthScore >= 70 && healthScore < 90 && "Good player performance"}
+            {healthScore >= 50 && healthScore < 70 && "Acceptable player performance"}
+            {healthScore < 50 && "Player performance needs attention"}
+          </p>
+        </div>
+      </div>
 
-        {/* VHS Segment Stats */}
-        <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-          <CardHeader>
-            <CardTitle>VHS Segment Statistics</CardTitle>
-            <CardDescription>HTTP segment request summary</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Total Requests</div>
-                  <div className="text-2xl font-bold">{vhsStats.requests.toLocaleString()}</div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Bytes Transferred</div>
-                  <div className="text-2xl font-bold">{(vhsStats.bytes / 1024 / 1024).toFixed(0)}MB</div>
-                </div>
-              </div>
+      {/* 4 Mini Stat Cards Below */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Dropped Frames % */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-white/10">
+          <div className="text-xs text-zinc-400 mb-2">Dropped Frames</div>
+          <div className="text-3xl font-bold text-zinc-100">{droppedFrames.percentage}%</div>
+          <div className="text-xs text-zinc-500 mt-1">{droppedFrames.droppedFrames} / {droppedFrames.totalFrames.toLocaleString()}</div>
+        </div>
 
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-2 font-medium">Aborted</td>
-                      <td className="p-2 text-right">{vhsStats.aborted}</td>
-                      <td className="p-2 text-right text-muted-foreground">{abortRate}%</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-2 font-medium">Timeout</td>
-                      <td className="p-2 text-right">{vhsStats.timeout}</td>
-                      <td className="p-2 text-right text-muted-foreground">
-                        {((vhsStats.timeout / vhsStats.requests) * 100).toFixed(2)}%
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-2 font-medium">Errored</td>
-                      <td className="p-2 text-right text-red-500">{vhsStats.errored}</td>
-                      <td className="p-2 text-right text-red-500">{errorRate}%</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2 font-medium">Avg Duration</td>
-                      <td className="p-2 text-right" colSpan={2}>
-                        {(vhsStats.duration / vhsStats.requests).toFixed(2)}s
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Segment Errors */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-white/10">
+          <div className="text-xs text-zinc-400 mb-2">Segment Errors</div>
+          <div className="text-3xl font-bold text-zinc-100">{errorRate}%</div>
+          <div className="text-xs text-zinc-500 mt-1">{vhsStats.errored} / {vhsStats.requests} requests</div>
+        </div>
+
+        {/* Avg Load Time */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-white/10">
+          <div className="text-xs text-zinc-400 mb-2">Avg Load Time</div>
+          <div className="text-3xl font-bold text-zinc-100">{(vhsStats.duration / vhsStats.requests).toFixed(2)}s</div>
+          <div className="text-xs text-zinc-500 mt-1">Per segment</div>
+        </div>
+
+        {/* Underflows (Derived from buffer starvation) */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-white/10">
+          <div className="text-xs text-zinc-400 mb-2">Underflows</div>
+          <div className="text-3xl font-bold text-zinc-100">{vhsStats.aborted}</div>
+          <div className="text-xs text-zinc-500 mt-1">Buffer events</div>
+        </div>
       </div>
 
       {/* Startup Performance */}
-      <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-        <CardHeader>
-          <CardTitle>Startup Performance</CardTitle>
-          <CardDescription>Time to interactive playback metrics</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Time to Loaded Data</div>
-              <div className="text-3xl font-bold">{startupMetrics.timeToLoadedData}ms</div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500"
-                  style={{ width: `${(startupMetrics.timeToLoadedData / 2000) * 100}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">First byte to loadeddata event</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Time to First Frame</div>
-              <div className="text-3xl font-bold">{startupMetrics.timeToFirstFrame}ms</div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-500"
-                  style={{ width: `${(startupMetrics.timeToFirstFrame / 2000) * 100}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Until first frame rendered</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Time to Playback</div>
-              <div className="text-3xl font-bold">{startupMetrics.timeToPlayback}ms</div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500"
-                  style={{ width: `${(startupMetrics.timeToPlayback / 2000) * 100}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Until playback begins</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* VHS Events Log */}
-      <Card className="transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
-        <CardHeader>
-          <CardTitle>VHS Events Log</CardTitle>
-          <CardDescription>Adaptive streaming events and interventions</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+        <h3 className="text-lg font-semibold text-zinc-100 mb-4">Startup Performance</h3>
+        <p className="text-sm text-zinc-400 mb-6">Time to interactive playback metrics</p>
+        <div className="grid gap-6 md:grid-cols-3">
           <div className="space-y-2">
-            {vhsEvents.map((event, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border">
-                <Badge variant="outline" className={`${getSeverityColor(event.severity)} shrink-0`}>
-                  {event.type}
-                </Badge>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm">{event.details}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {new Date(event.timestamp).toLocaleString()}
-                  </div>
-                </div>
-                <Badge variant="outline" className="shrink-0">
-                  {event.severity}
-                </Badge>
-              </div>
-            ))}
+            <div className="text-sm font-medium text-zinc-200">Time to Loaded Data</div>
+            <div className="text-3xl font-bold text-zinc-100">{startupMetrics.timeToLoadedData}ms</div>
+            <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-500"
+                style={{ width: `${(startupMetrics.timeToLoadedData / 2000) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-zinc-500">First byte to loadeddata event</p>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-zinc-200">Time to First Frame</div>
+            <div className="text-3xl font-bold text-zinc-100">{startupMetrics.timeToFirstFrame}ms</div>
+            <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-green-500"
+                style={{ width: `${(startupMetrics.timeToFirstFrame / 2000) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-zinc-500">Until first frame rendered</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-zinc-200">Time to Playback</div>
+            <div className="text-3xl font-bold text-zinc-100">{startupMetrics.timeToPlayback}ms</div>
+            <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-purple-500"
+                style={{ width: `${(startupMetrics.timeToPlayback / 2000) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-zinc-500">Until playback begins</p>
+          </div>
+        </div>
+      </div>
+
+      {/* VHS Events Log - Styled Table with Glass Effect */}
+      <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+        <h3 className="text-lg font-semibold text-zinc-100 mb-2">VHS Events Log</h3>
+        <p className="text-sm text-zinc-400 mb-6">Adaptive streaming events and interventions</p>
+        <div className="space-y-2">
+          {vhsEvents.map((event, index) => (
+            <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-zinc-900/50 border border-white/5">
+              <Badge variant="outline" className={`${getSeverityColor(event.severity)} shrink-0`}>
+                {event.type}
+              </Badge>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-zinc-200">{event.details}</div>
+                <div className="text-xs text-zinc-500 mt-1">
+                  {new Date(event.timestamp).toLocaleString()}
+                </div>
+              </div>
+              <Badge variant="outline" className="shrink-0 bg-zinc-900/50 border-white/10">
+                {event.severity}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Viewport vs Rendition Mismatch - WASTED BANDWIDTH */}
-      <Card className="border-2 border-orange-200 dark:border-orange-800">
-        <CardHeader>
-          <CardTitle>Viewport vs Rendition Mismatch</CardTitle>
-          <CardDescription>Wasted bandwidth from oversized video delivery</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-gradient-to-br from-orange-900/20 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border-2 border-orange-500/30">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-1">Viewport vs Rendition Mismatch</h3>
+          <p className="text-sm text-zinc-400">Wasted bandwidth from oversized video delivery</p>
+        </div>
+        <div>
           {/* Overview Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-xs text-muted-foreground mb-1">Total Viewers</div>
-              <div className="text-2xl font-bold">{viewportStats.totalViewers.toLocaleString()}</div>
+            <div className="bg-zinc-900/50 p-4 rounded-lg border border-white/10">
+              <div className="text-xs text-zinc-400 mb-1">Total Viewers</div>
+              <div className="text-2xl font-bold text-zinc-100">{viewportStats.totalViewers.toLocaleString()}</div>
             </div>
-            <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
-              <div className="text-xs text-red-600 dark:text-red-400 mb-1">Oversized Delivery</div>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+            <div className="bg-red-900/20 p-4 rounded-lg border border-red-500/30">
+              <div className="text-xs text-red-400 mb-1">Oversized Delivery</div>
+              <div className="text-2xl font-bold text-red-400">
                 {viewportStats.oversizedPercentage}%
               </div>
             </div>
-            <div className="bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
-              <div className="text-xs text-orange-600 dark:text-orange-400 mb-1">Wasted Bandwidth</div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+            <div className="bg-orange-900/20 p-4 rounded-lg border border-orange-500/30">
+              <div className="text-xs text-orange-400 mb-1">Wasted Bandwidth</div>
+              <div className="text-2xl font-bold text-orange-400">
                 {viewportStats.wastedBandwidthGB}GB
               </div>
             </div>
-            <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="text-xs text-green-600 dark:text-green-400 mb-1">Potential Savings</div>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="bg-green-900/20 p-4 rounded-lg border border-green-500/30">
+              <div className="text-xs text-green-400 mb-1">Potential Savings</div>
+              <div className="text-2xl font-bold text-green-400">
                 {viewportStats.potentialSavingsPercent}%
               </div>
             </div>
@@ -409,27 +380,27 @@ export function PlayerHealth() {
 
           {/* Breakdown Table */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold mb-3">Mismatch Breakdown</h4>
-            <div className="relative overflow-x-auto rounded-lg border">
+            <h4 className="text-sm font-semibold text-zinc-100 mb-3">Mismatch Breakdown</h4>
+            <div className="relative overflow-x-auto rounded-lg border border-white/10">
               <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr className="border-b">
-                    <th className="text-left p-3 font-semibold">Delivered Resolution</th>
-                    <th className="text-left p-3 font-semibold">Viewport Size</th>
-                    <th className="text-right p-3 font-semibold">Affected Viewers</th>
-                    <th className="text-right p-3 font-semibold">Wasted (GB)</th>
-                    <th className="text-center p-3 font-semibold">Impact</th>
+                <thead className="bg-zinc-900/50">
+                  <tr className="border-b border-white/10">
+                    <th className="text-left p-3 font-semibold text-zinc-300">Delivered Resolution</th>
+                    <th className="text-left p-3 font-semibold text-zinc-300">Viewport Size</th>
+                    <th className="text-right p-3 font-semibold text-zinc-300">Affected Viewers</th>
+                    <th className="text-right p-3 font-semibold text-zinc-300">Wasted (GB)</th>
+                    <th className="text-center p-3 font-semibold text-zinc-300">Impact</th>
                   </tr>
                 </thead>
                 <tbody>
                   {viewportStats.breakdowns.map((row, idx) => {
                     const impactLevel = row.viewers > 2000 ? "high" : row.viewers > 1000 ? "medium" : "low";
                     return (
-                      <tr key={idx} className="border-b hover:bg-muted/50">
-                        <td className="p-3 font-medium">{row.resolution}</td>
-                        <td className="p-3 text-muted-foreground">{row.viewport}</td>
-                        <td className="p-3 text-right font-semibold">{row.viewers.toLocaleString()}</td>
-                        <td className="p-3 text-right text-orange-600 dark:text-orange-400 font-semibold">
+                      <tr key={idx} className="border-b border-white/5 hover:bg-zinc-800/50">
+                        <td className="p-3 font-medium text-zinc-200">{row.resolution}</td>
+                        <td className="p-3 text-zinc-400">{row.viewport}</td>
+                        <td className="p-3 text-right font-semibold text-zinc-200">{row.viewers.toLocaleString()}</td>
+                        <td className="p-3 text-right text-orange-400 font-semibold">
                           {row.wastedBandwidth.toFixed(1)}
                         </td>
                         <td className="p-3 text-center">
@@ -451,8 +422,8 @@ export function PlayerHealth() {
           {/* Visual Comparison */}
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
-              <h4 className="text-sm font-semibold mb-3">Example: 1080p → 480p Viewport</h4>
-              <div className="relative h-48 bg-muted rounded-lg flex items-center justify-center p-4">
+              <h4 className="text-sm font-semibold text-zinc-100 mb-3">Example: 1080p → 480p Viewport</h4>
+              <div className="relative h-48 bg-zinc-900/50 rounded-lg flex items-center justify-center p-4 border border-white/10">
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* Viewport (small) */}
                   <div className="absolute border-4 border-blue-500 rounded" style={{ width: "120px", height: "68px" }}>
@@ -474,14 +445,14 @@ export function PlayerHealth() {
             </div>
 
             <div>
-              <h4 className="text-sm font-semibold mb-3">Percentage Breakdown</h4>
+              <h4 className="text-sm font-semibold text-zinc-100 mb-3">Percentage Breakdown</h4>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Correct Size</span>
-                    <span className="font-semibold">{(100 - viewportStats.oversizedPercentage).toFixed(1)}%</span>
+                    <span className="text-zinc-200">Correct Size</span>
+                    <span className="font-semibold text-zinc-200">{(100 - viewportStats.oversizedPercentage).toFixed(1)}%</span>
                   </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div className="h-3 bg-zinc-900 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-green-500" 
                       style={{ width: `${100 - viewportStats.oversizedPercentage}%` }}
@@ -490,12 +461,12 @@ export function PlayerHealth() {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Oversized (Wasted)</span>
-                    <span className="font-semibold text-red-600 dark:text-red-400">
+                    <span className="text-zinc-200">Oversized (Wasted)</span>
+                    <span className="font-semibold text-red-400">
                       {viewportStats.oversizedPercentage}%
                     </span>
                   </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div className="h-3 bg-zinc-900 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-red-500" 
                       style={{ width: `${viewportStats.oversizedPercentage}%` }}
@@ -507,34 +478,34 @@ export function PlayerHealth() {
           </div>
 
           {/* Recommendations */}
-          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h4 className="text-sm font-semibold mb-2 text-blue-900 dark:text-blue-100">
+          <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+            <h4 className="text-sm font-semibold mb-2 text-blue-300">
               💡 Optimization Recommendations
             </h4>
-            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+            <ul className="space-y-2 text-sm text-blue-200">
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400">•</span>
+                <span className="text-blue-400">•</span>
                 <span>
                   <strong>Implement viewport-aware ABR:</strong> Limit max rendition to 1.2x viewport resolution
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400">•</span>
+                <span className="text-blue-400">•</span>
                 <span>
                   <strong>Estimated savings:</strong> {viewportStats.wastedBandwidthGB}GB/day = ~
                   {(viewportStats.wastedBandwidthGB * 30 * 0.08).toFixed(0)}$/month in CDN costs
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 dark:text-blue-400">•</span>
+                <span className="text-blue-400">•</span>
                 <span>
                   <strong>User benefit:</strong> Reduced buffer time and faster startup for {(viewportStats.totalViewers * viewportStats.oversizedPercentage / 100).toFixed(0)} viewers
                 </span>
               </li>
             </ul>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

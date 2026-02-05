@@ -44,21 +44,26 @@ export function Header({ className }: HeaderProps) {
   return (
     <header
       className={cn(
-        'flex h-16 items-center justify-between border-b border-white/10 bg-gray-900/50 px-6 backdrop-blur-sm',
+        'flex h-16 items-center justify-between px-6',
+        'bg-gradient-to-r from-zinc-900/95 via-zinc-900/90 to-zinc-900/95 backdrop-blur-xl',
+        'border-b border-white/10 shadow-lg',
         className
       )}
     >
       {/* Logo (mobile fallback) + Last Updated */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3 lg:hidden">
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             Smartbit
           </span>
         </div>
-        <div className="hidden md:flex items-center gap-2 text-sm text-gray-400">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+        <div className="hidden md:flex items-center gap-2 text-sm text-zinc-400">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </div>
           <span>
-            Last updated: <span className="font-medium text-gray-300">{secondsSinceUpdate}s ago</span>
+            Last updated: <span className="font-medium text-zinc-300">{secondsSinceUpdate}s ago</span>
           </span>
         </div>
       </div>
@@ -67,17 +72,17 @@ export function Header({ className }: HeaderProps) {
       <div className="flex items-center gap-4">
         {/* Time Range Selector */}
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-gray-800/50 p-1">
+          <Calendar className="h-4 w-4 text-zinc-400" />
+          <div className="flex items-center gap-1 rounded-lg bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-white/10 p-1 shadow-inner">
             {timeRanges.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setTimeRange(range.value)}
                 className={cn(
-                  'rounded-md px-3 py-1.5 text-sm font-medium transition-all',
+                  'rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-300',
                   timeRange === range.value
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-gray-300 hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30 scale-105'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 hover:scale-105'
                 )}
               >
                 {range.label}
@@ -91,8 +96,10 @@ export function Header({ className }: HeaderProps) {
           onClick={handleRefresh}
           disabled={isRefreshing}
           className={cn(
-            'flex items-center gap-2 rounded-lg border border-white/10 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-300 transition-all hover:bg-white/5 hover:text-gray-200 disabled:opacity-50',
-            isRefreshing && 'cursor-not-allowed'
+            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300',
+            'bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-white/10',
+            'text-zinc-300 hover:text-zinc-100 hover:border-white/20 hover:shadow-lg hover:scale-105',
+            'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
           )}
         >
           <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
@@ -100,8 +107,8 @@ export function Header({ className }: HeaderProps) {
         </button>
 
         {/* User Avatar Placeholder */}
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-          <User className="h-5 w-5 text-gray-400" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:shadow-xl hover:shadow-blue-500/20">
+          <User className="h-5 w-5 text-zinc-400" />
         </div>
       </div>
     </header>

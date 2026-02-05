@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shared/card";
 import { Badge } from "@/components/shared/badge";
 
 interface SessionDOMetrics {
@@ -75,23 +74,50 @@ export function DurableObjects() {
     switch (status) {
       case "active":
       case "normal":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
+        return "bg-green-500/10 text-green-400 border-green-500/20";
       case "scaling":
       case "degraded":
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
       case "idle":
-        return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+        return "bg-gray-500/10 text-gray-400 border-gray-500/20";
       case "error":
       case "anomaly":
       case "inactive":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
+        return "bg-red-500/10 text-red-400 border-red-500/20";
       default:
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    }
+  };
+
+  const getStatusDot = (status: string) => {
+    switch (status) {
+      case "active":
+      case "normal":
+        return "bg-green-500";
+      case "scaling":
+      case "degraded":
+        return "bg-yellow-500";
+      case "idle":
+        return "bg-gray-500";
+      case "error":
+      case "anomaly":
+      case "inactive":
+        return "bg-red-500";
+      default:
+        return "bg-blue-500";
     }
   };
 
   const totalViewers = streamDOs.reduce((sum, stream) => sum + stream.viewers, 0);
   const totalShards = streamDOs.reduce((sum, stream) => sum + stream.shardCount, 0);
+  
+  const normalRegions = regionalQoE.filter(r => r.status === "normal").length;
+  const degradedRegions = regionalQoE.filter(r => r.status === "degraded").length;
+  const anomalyRegions = regionalQoE.filter(r => r.status === "anomaly").length;
+
+  const activeEdges = edgeLocations.filter(l => l.cmsdStatus === "active").length;
+  const errorEdges = edgeLocations.filter(l => l.cmsdStatus === "error").length;
+  const inactiveEdges = edgeLocations.filter(l => l.cmsdStatus === "inactive").length;
 
   return (
     <div className="space-y-6">
@@ -103,206 +129,209 @@ export function DurableObjects() {
         <Badge variant="outline" className="text-sm">Edge State</Badge>
       </div>
 
-      {/* Session DOs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Session Durable Objects</CardTitle>
-          <CardDescription>User session state management</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-xs text-muted-foreground mb-1">Active Sessions</div>
-              <div className="text-3xl font-bold">{sessionDO.activeCount.toLocaleString()}</div>
-            </div>
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-xs text-muted-foreground mb-1">Total Sessions</div>
-              <div className="text-3xl font-bold">{sessionDO.totalSessions.toLocaleString()}</div>
-            </div>
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-xs text-muted-foreground mb-1">Avg Events/Session</div>
-              <div className="text-3xl font-bold">{sessionDO.avgEventsPerSession}</div>
-            </div>
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="text-xs text-muted-foreground mb-1">Memory Usage</div>
-              <div className="text-3xl font-bold">{sessionDO.memoryUsage}GB</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stream DOs */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      {/* 2x2 GRID: 4 Equal Glass Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Session DOs */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <CardTitle>Stream Durable Objects</CardTitle>
-              <CardDescription>Per-channel viewer coordination</CardDescription>
+              <h3 className="text-lg font-semibold text-zinc-100">Session DOs</h3>
+              <p className="text-xs text-zinc-400 mt-1">User session state management</p>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">Total</div>
-              <div className="text-2xl font-bold">{totalViewers.toLocaleString()} viewers</div>
-              <div className="text-xs text-muted-foreground">{totalShards} shards</div>
-            </div>
+            <div className={`w-3 h-3 rounded-full ${getStatusDot("active")} animate-pulse`}></div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {streamDOs.map((stream) => (
-              <div key={stream.channel} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className={getStatusColor(stream.status)}>
-                    {stream.status}
-                  </Badge>
-                  <div>
-                    <div className="font-medium">{stream.channel}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {stream.shardCount} shard{stream.shardCount !== 1 ? "s" : ""}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold">{stream.viewers.toLocaleString()}</div>
-                  <div className="text-xs text-muted-foreground">viewers</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Regional QoE DOs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Regional QoE Durable Objects</CardTitle>
-          <CardDescription>Anomaly detection status by region</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-4">
-            {regionalQoE.map((region) => (
-              <div
-                key={region.region}
-                className={`p-4 rounded-lg border-2 ${getStatusColor(region.status)}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold">{region.region}</span>
+          <div className="space-y-4">
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-3xl font-bold text-zinc-100">{sessionDO.activeCount.toLocaleString()}</div>
+                <div className="text-xs text-zinc-400 mt-1">Active Sessions</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-semibold text-zinc-300">{sessionDO.totalSessions.toLocaleString()}</div>
+                <div className="text-xs text-zinc-500">Total</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-zinc-900/50 p-3 rounded-lg border border-white/5">
+                <div className="text-xs text-zinc-400">Avg Events</div>
+                <div className="text-lg font-bold text-zinc-100">{sessionDO.avgEventsPerSession}</div>
+              </div>
+              <div className="bg-zinc-900/50 p-3 rounded-lg border border-white/5">
+                <div className="text-xs text-zinc-400">Memory</div>
+                <div className="text-lg font-bold text-zinc-100">{sessionDO.memoryUsage}GB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stream DOs */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-100">Stream DOs</h3>
+              <p className="text-xs text-zinc-400 mt-1">Per-channel viewer coordination</p>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${getStatusDot("active")} animate-pulse`}></div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-3xl font-bold text-zinc-100">{totalViewers.toLocaleString()}</div>
+                <div className="text-xs text-zinc-400 mt-1">Total Viewers</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xl font-semibold text-zinc-300">{totalShards}</div>
+                <div className="text-xs text-zinc-500">Shards</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {streamDOs.slice(0, 3).map((stream) => (
+                <div key={stream.channel} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${getStatusDot(stream.status)}`}></div>
+                    <span className="text-zinc-300">{stream.channel}</span>
+                  </div>
+                  <span className="font-semibold text-zinc-100">{stream.viewers.toLocaleString()}</span>
+                </div>
+              ))}
+              <div className="text-xs text-zinc-500 text-center pt-1">
+                +{streamDOs.length - 3} more channels
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Regional DOs */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-100">Regional DOs</h3>
+              <p className="text-xs text-zinc-400 mt-1">QoE anomaly detection by region</p>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${getStatusDot(anomalyRegions > 0 ? "anomaly" : "normal")} ${anomalyRegions > 0 ? 'animate-pulse' : ''}`}></div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-green-900/20 p-3 rounded-lg border border-green-500/20">
+                <div className="text-2xl font-bold text-green-400">{normalRegions}</div>
+                <div className="text-xs text-green-300">Normal</div>
+              </div>
+              <div className="bg-yellow-900/20 p-3 rounded-lg border border-yellow-500/20">
+                <div className="text-2xl font-bold text-yellow-400">{degradedRegions}</div>
+                <div className="text-xs text-yellow-300">Degraded</div>
+              </div>
+              <div className="bg-red-900/20 p-3 rounded-lg border border-red-500/20">
+                <div className="text-2xl font-bold text-red-400">{anomalyRegions}</div>
+                <div className="text-xs text-red-300">Anomaly</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {regionalQoE.filter(r => r.status !== "normal").slice(0, 3).map((region) => (
+                <div key={region.region} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${getStatusDot(region.status)}`}></div>
+                    <span className="text-zinc-300">{region.region}</span>
+                  </div>
                   <Badge variant="outline" className={`text-xs ${getStatusColor(region.status)}`}>
                     {region.status}
                   </Badge>
                 </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Bitrate:</span>
-                    <span className="font-medium">{(region.avgBitrate / 1000).toFixed(1)}M</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Edge DOs */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-100">Edge DOs</h3>
+              <p className="text-xs text-zinc-400 mt-1">CMSD generation per PoP</p>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${getStatusDot(errorEdges > 0 ? "error" : "active")} ${errorEdges > 0 ? 'animate-pulse' : ''}`}></div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-green-900/20 p-3 rounded-lg border border-green-500/20">
+                <div className="text-2xl font-bold text-green-400">{activeEdges}</div>
+                <div className="text-xs text-green-300">Active</div>
+              </div>
+              <div className="bg-red-900/20 p-3 rounded-lg border border-red-500/20">
+                <div className="text-2xl font-bold text-red-400">{errorEdges}</div>
+                <div className="text-xs text-red-300">Error</div>
+              </div>
+              <div className="bg-gray-900/20 p-3 rounded-lg border border-gray-500/20">
+                <div className="text-2xl font-bold text-gray-400">{inactiveEdges}</div>
+                <div className="text-xs text-gray-300">Inactive</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {edgeLocations.filter(l => l.cmsdStatus !== "active").slice(0, 3).map((edge) => (
+                <div key={edge.location} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${getStatusDot(edge.cmsdStatus)}`}></div>
+                    <span className="text-zinc-300 font-mono">{edge.location}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Latency:</span>
-                    <span className="font-medium">{region.avgLatency}ms</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Error Rate:</span>
-                    <span className={`font-medium ${region.errorRate > 1 ? "text-red-500" : ""}`}>
-                      {region.errorRate}%
-                    </span>
+                  <Badge variant="outline" className={`text-xs ${getStatusColor(edge.cmsdStatus)}`}>
+                    {edge.cmsdStatus}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Tables (Optional, Below Grid) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Stream Details */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-4">Stream DO Details</h3>
+          <div className="space-y-2">
+            {streamDOs.map((stream) => (
+              <div key={stream.channel} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded border border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${getStatusDot(stream.status)}`}></div>
+                  <span className="text-sm text-zinc-200">{stream.channel}</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-zinc-100">{stream.viewers.toLocaleString()}</div>
+                  <div className="text-xs text-zinc-500">{stream.shardCount} shards</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Edge Details */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-4">Edge Location Details</h3>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {edgeLocations.map((edge) => (
+              <div key={edge.location} className="flex items-center justify-between p-2 bg-zinc-900/50 rounded border border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${getStatusDot(edge.cmsdStatus)}`}></div>
+                  <span className="text-sm text-zinc-200 font-mono">{edge.location}</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-zinc-400">{edge.requestCount.toLocaleString()} req</div>
+                  <div className="text-xs text-zinc-500">
+                    {edge.cmsdStatus === "active" ? `${edge.avgGenerationTime.toFixed(1)}ms` : "-"}
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 flex gap-4 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span>Normal</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <span>Degraded</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span>Anomaly</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Edge Location DOs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Edge Location Durable Objects</CardTitle>
-          <CardDescription>CMSD generation status per PoP</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2 font-medium">Location</th>
-                  <th className="text-center p-2 font-medium">CMSD Status</th>
-                  <th className="text-right p-2 font-medium">Requests</th>
-                  <th className="text-right p-2 font-medium">Avg Gen Time</th>
-                  <th className="text-right p-2 font-medium">Throughput</th>
-                </tr>
-              </thead>
-              <tbody>
-                {edgeLocations.map((location) => (
-                  <tr key={location.location} className="border-b">
-                    <td className="p-2 font-bold">{location.location}</td>
-                    <td className="p-2 text-center">
-                      <Badge variant="outline" className={getStatusColor(location.cmsdStatus)}>
-                        {location.cmsdStatus}
-                      </Badge>
-                    </td>
-                    <td className="p-2 text-right">{location.requestCount.toLocaleString()}</td>
-                    <td className="p-2 text-right">
-                      {location.cmsdStatus === "inactive" ? (
-                        <span className="text-muted-foreground">-</span>
-                      ) : (
-                        <span
-                          className={
-                            location.avgGenerationTime > 5 ? "text-red-500 font-medium" : ""
-                          }
-                        >
-                          {location.avgGenerationTime.toFixed(1)}ms
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-2 text-right">
-                      {location.cmsdStatus === "inactive" ? (
-                        <span className="text-muted-foreground">-</span>
-                      ) : (
-                        <span>
-                          {(location.requestCount / (location.avgGenerationTime / 1000)).toFixed(
-                            0
-                          )}{" "}
-                          req/s
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
-            <div className="font-medium mb-1">Status Summary:</div>
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div>
-                <span className="text-green-500">●</span> Active:{" "}
-                {edgeLocations.filter((l) => l.cmsdStatus === "active").length}
-              </div>
-              <div>
-                <span className="text-gray-500">●</span> Inactive:{" "}
-                {edgeLocations.filter((l) => l.cmsdStatus === "inactive").length}
-              </div>
-              <div>
-                <span className="text-red-500">●</span> Error:{" "}
-                {edgeLocations.filter((l) => l.cmsdStatus === "error").length}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
