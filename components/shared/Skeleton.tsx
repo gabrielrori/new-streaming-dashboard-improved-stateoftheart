@@ -12,7 +12,7 @@ export function Skeleton({
   variant = 'rectangular',
   animation = 'wave',
 }: SkeletonProps) {
-  const baseClasses = 'bg-gray-700/50';
+  const baseClasses = 'bg-zinc-800/50';
   
   const variantClasses = {
     text: 'h-4 rounded',
@@ -22,7 +22,7 @@ export function Skeleton({
 
   const animationClasses = {
     pulse: 'animate-pulse',
-    wave: 'animate-shimmer bg-gradient-to-r from-gray-700/50 via-gray-600/50 to-gray-700/50 bg-[length:200%_100%]',
+    wave: 'animate-shimmer bg-gradient-to-r from-zinc-800/50 via-zinc-700/50 to-zinc-800/50 bg-[length:200%_100%]',
     none: '',
   };
 
@@ -41,7 +41,7 @@ export function Skeleton({
 // Chart Skeleton
 export function ChartSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4 animate-fadeIn', className)}>
       <div className="space-y-2">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3 w-48" />
@@ -61,7 +61,7 @@ export function ChartSkeleton({ className }: { className?: string }) {
 // Card Skeleton
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('space-y-4 p-6', className)}>
+    <div className={cn('space-y-4 p-6 glass-card animate-fadeIn', className)}>
       <div className="flex items-center justify-between">
         <Skeleton className="h-12 w-12" variant="circular" />
         <Skeleton className="h-4 w-16" />
@@ -78,7 +78,7 @@ export function CardSkeleton({ className }: { className?: string }) {
 // Table Skeleton
 export function TableSkeleton({ rows = 5, className }: { rows?: number; className?: string }) {
   return (
-    <div className={cn('space-y-3', className)}>
+    <div className={cn('space-y-3 animate-fadeIn', className)}>
       <div className="flex gap-4">
         <Skeleton className="h-5 flex-1" />
         <Skeleton className="h-5 flex-1" />

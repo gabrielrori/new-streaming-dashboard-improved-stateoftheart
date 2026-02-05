@@ -12,31 +12,35 @@ interface AlertBadgeProps {
 
 const severityConfig: Record<
   AlertSeverity,
-  { icon: React.ComponentType<{ className?: string }>; bg: string; text: string; border: string }
+  { icon: React.ComponentType<{ className?: string }>; bg: string; text: string; border: string; shadow: string }
 > = {
   critical: {
     icon: AlertCircle,
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
-    border: 'border-red-500/30',
+    bg: 'bg-rose-500/10',
+    text: 'text-rose-400',
+    border: 'border-rose-500/30',
+    shadow: 'shadow-glow-rose-sm',
   },
   warning: {
     icon: AlertTriangle,
-    bg: 'bg-yellow-500/10',
-    text: 'text-yellow-400',
-    border: 'border-yellow-500/30',
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-400',
+    border: 'border-amber-500/30',
+    shadow: 'shadow-glow-amber-sm',
   },
   info: {
     icon: Info,
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/30',
+    bg: 'bg-sky-500/10',
+    text: 'text-sky-400',
+    border: 'border-sky-500/30',
+    shadow: 'shadow-glow-blue-sm',
   },
   success: {
     icon: CheckCircle,
     bg: 'bg-emerald-500/10',
     text: 'text-emerald-400',
     border: 'border-emerald-500/30',
+    shadow: 'shadow-glow-sm',
   },
 };
 
@@ -47,14 +51,16 @@ export function AlertBadge({ severity, message, className }: AlertBadgeProps) {
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-medium',
+        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium',
+        'transition-premium backdrop-blur-sm',
         config.bg,
         config.text,
         config.border,
+        'hover:' + config.shadow,
         className
       )}
     >
-      <Icon className="w-3 h-3" />
+      <Icon className="w-3.5 h-3.5" />
       {message && <span>{message}</span>}
     </div>
   );

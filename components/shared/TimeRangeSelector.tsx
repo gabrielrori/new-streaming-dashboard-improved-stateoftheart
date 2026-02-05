@@ -27,7 +27,7 @@ export function TimeRangeSelector({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1 rounded-lg border border-white/10 bg-gray-900/70 p-1 backdrop-blur-sm',
+        'inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/70 p-1 backdrop-blur-md',
         className
       )}
     >
@@ -36,10 +36,10 @@ export function TimeRangeSelector({
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            'rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200',
+            'rounded-md px-3 py-1.5 text-xs font-medium transition-premium',
             value === option.value
-              ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20'
-              : 'text-gray-400 hover:bg-white/5 hover:text-gray-300'
+              ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-glow-md'
+              : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300'
           )}
         >
           {option.label}

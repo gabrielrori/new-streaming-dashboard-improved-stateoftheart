@@ -33,18 +33,23 @@ export function SectionHeader({
   };
 
   return (
-    <div className={cn('flex items-center justify-between border-b border-white/10 pb-4', className)}>
+    <div
+      className={cn(
+        'flex items-center justify-between border-b border-zinc-800 pb-4 mb-6',
+        className
+      )}
+    >
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
-          <Icon className="h-5 w-5 text-blue-400" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500/20 to-emerald-500/20 border border-sky-500/30 backdrop-blur-sm">
+          <Icon className="h-5 w-5 text-sky-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-100">{title}</h2>
+        <h2 className="text-2xl font-bold text-zinc-100">{title}</h2>
       </div>
 
       <div className="flex items-center gap-3">
         {dataSource && <DataSourceBadge source={dataSource} />}
         {lastUpdated && (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-zinc-500">
             Updated {formatLastUpdated(lastUpdated)}
           </span>
         )}

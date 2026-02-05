@@ -10,9 +10,9 @@ interface DataSourceBadgeProps {
 
 const sourceColors: Record<DataSource, { bg: string; text: string; border: string }> = {
   'Video.js VHS': {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/30',
+    bg: 'bg-sky-500/10',
+    text: 'text-sky-400',
+    border: 'border-sky-500/30',
   },
   'Cloudflare Logpush': {
     bg: 'bg-orange-500/10',
@@ -37,7 +37,8 @@ export function DataSourceBadge({ source, className }: DataSourceBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border',
+        'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border',
+        'backdrop-blur-sm transition-premium',
         colors.bg,
         colors.text,
         colors.border,

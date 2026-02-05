@@ -14,7 +14,7 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
-import { Wifi, Signal } from "lucide-react";
+import { Wifi, Signal, Activity } from "lucide-react";
 
 // Custom Tooltip Component
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,139 +128,65 @@ const connectionTypeData = [
   { name: "2G", value: 3.5, color: "#ef4444" },
 ];
 
+// Calculate averages
+const avgTTFB = Math.round(segmentTTFBData.reduce((sum, item) => sum + item.ttfb, 0) / segmentTTFBData.length);
+const avgThroughput = (throughputData.reduce((sum, item) => sum + item.throughput, 0) / throughputData.length).toFixed(1);
+const connectionQuality = 87.5; // Mock quality percentage
+
 export default function NetworkMetrics() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-zinc-100">Network Metrics</h2>
 
+      {/* TOP: 3 Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Client TTFB */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Client TTFB</h3>
+            <Signal className="w-5 h-5 text-blue-400" />
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{avgTTFB}</span>
+            <span className="text-xl text-zinc-400 mb-1">ms</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Average segment TTFB</p>
+        </div>
+
+        {/* Throughput */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Throughput</h3>
+            <Activity className="w-5 h-5 text-green-400" />
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{avgThroughput}</span>
+            <span className="text-xl text-zinc-400 mb-1">Mbps</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Average network throughput</p>
+        </div>
+
+        {/* Connection Quality */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10 transition-all hover:shadow-xl hover:scale-[1.02]">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-zinc-400">Connection Quality</h3>
+            <Wifi className="w-5 h-5 text-purple-400" />
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-bold text-zinc-100">{connectionQuality}</span>
+            <span className="text-xl text-zinc-400 mb-1">%</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-2">Overall connection health</p>
+        </div>
+      </div>
+
+      {/* MIDDLE: 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Client-Perceived TTFB per Segment */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Client-Perceived TTFB per Segment</h3>
-            <div className="flex items-center space-x-2">
-              <Signal className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">Last 15 segments</span>
-            </div>
-          </div>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={segmentTTFBData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
-                <XAxis
-                  dataKey="segment"
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                  label={{ value: "Segment #", position: "insideBottom", offset: -5 }}
-                />
-                <YAxis
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                  label={{ value: "TTFB (ms)", angle: -90, position: "insideLeft" }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="line"
-                />
-                {/* Reference line for acceptable TTFB */}
-                <ReferenceLine 
-                  y={50} 
-                  stroke="#ef4444" 
-                  strokeDasharray="5 5"
-                  label={{ 
-                    value: 'Threshold (50ms)', 
-                    fill: '#ef4444',
-                    fontSize: 12,
-                    position: 'right'
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="ttfb"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                  name="TTFB"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Average TTFB</p>
-              <p className="text-lg font-semibold text-zinc-100">43ms</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Min TTFB</p>
-              <p className="text-lg font-semibold text-green-600 dark:text-green-400">35ms</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Max TTFB</p>
-              <p className="text-lg font-semibold text-red-600 dark:text-red-400">52ms</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Throughput Over Time */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Throughput Over Time</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">5 min window</span>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={throughputData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
-                <XAxis
-                  dataKey="time"
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                />
-                <YAxis
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                  label={{ value: "Mbps", angle: -90, position: "insideLeft" }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="line"
-                />
-                {/* Reference line for minimum recommended throughput */}
-                <ReferenceLine 
-                  y={8} 
-                  stroke="#f59e0b" 
-                  strokeDasharray="5 5"
-                  label={{ 
-                    value: 'Min (8 Mbps)', 
-                    fill: '#f59e0b',
-                    fontSize: 12,
-                    position: 'right'
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="throughput"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  dot={false}
-                  name="Throughput"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="mt-4 text-sm text-zinc-400">
-            Average: <span className="font-semibold text-zinc-100">10.1 Mbps</span>
-          </p>
-        </div>
-
         {/* Connection Type Distribution */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-zinc-100">Connection Type Distribution</h3>
-            <Wifi className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <Wifi className="w-5 h-5 text-gray-400" />
           </div>
           <div className="h-72 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -298,14 +224,14 @@ export default function NetworkMetrics() {
         </div>
 
         {/* Connection Waterfall Visualization */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700 lg:col-span-2">
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-zinc-100">Connection Waterfall</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">DNS → TCP → TLS → TTFB → Download</span>
+            <span className="text-xs text-gray-400">DNS → TCP → TLS → TTFB → Download</span>
           </div>
 
           {/* Phase Breakdown with p50/p95 */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-4">
             {waterfallData.map((phase, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -321,7 +247,7 @@ export default function NetworkMetrics() {
                 </div>
                 
                 {/* Horizontal bar showing p50 and p95 */}
-                <div className="relative h-10 bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
+                <div className="relative h-8 bg-zinc-900 rounded-lg overflow-hidden">
                   {/* p50 bar */}
                   <div
                     className="absolute h-full flex items-center px-2 text-xs font-medium text-white"
@@ -331,7 +257,7 @@ export default function NetworkMetrics() {
                       opacity: 0.8
                     }}
                   >
-                    {phase.p50 > 20 && `p50: ${phase.p50}ms`}
+                    {phase.p50 > 20 && `${phase.p50}ms`}
                   </div>
                   
                   {/* p95 indicator */}
@@ -341,72 +267,10 @@ export default function NetworkMetrics() {
                       left: `${(phase.p95 / 450) * 100}%`,
                       borderColor: phase.color
                     }}
-                  >
-                    <div className="absolute -top-1 -right-8 text-xs font-semibold" style={{ color: phase.color }}>
-                      p95
-                    </div>
-                  </div>
+                  />
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Sample Requests Timeline */}
-          <div className="border-t border-zinc-700 pt-6">
-            <h4 className="text-sm font-semibold text-zinc-100 mb-4">Sample Request Timeline</h4>
-            <div className="space-y-3">
-              {sampleRequests.map((item, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-zinc-100 font-mono">{item.resource}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.total}ms</span>
-                  </div>
-                  <div className="flex h-6 rounded overflow-hidden">
-                    {item.dns > 0 && (
-                      <div
-                        className="bg-purple-500 flex items-center justify-center text-xs text-white"
-                        style={{ width: `${(item.dns / item.total) * 100}%` }}
-                        title={`DNS: ${item.dns}ms`}
-                      >
-                        {item.dns > 8 && "DNS"}
-                      </div>
-                    )}
-                    {item.tcp > 0 && (
-                      <div
-                        className="bg-blue-500 flex items-center justify-center text-xs text-white"
-                        style={{ width: `${(item.tcp / item.total) * 100}%` }}
-                        title={`TCP: ${item.tcp}ms`}
-                      >
-                        {item.tcp > 10 && "TCP"}
-                      </div>
-                    )}
-                    {item.tls > 0 && (
-                      <div
-                        className="bg-cyan-500 flex items-center justify-center text-xs text-white"
-                        style={{ width: `${(item.tls / item.total) * 100}%` }}
-                        title={`TLS: ${item.tls}ms`}
-                      >
-                        {item.tls > 10 && "TLS"}
-                      </div>
-                    )}
-                    <div
-                      className="bg-yellow-500 flex items-center justify-center text-xs text-white"
-                      style={{ width: `${(item.ttfb / item.total) * 100}%` }}
-                      title={`TTFB: ${item.ttfb}ms`}
-                    >
-                      {item.ttfb > 5 && "TTFB"}
-                    </div>
-                    <div
-                      className="bg-green-500 flex items-center justify-center text-xs text-white"
-                      style={{ width: `${(item.download / item.total) * 100}%` }}
-                      title={`Download: ${item.download}ms`}
-                    >
-                      DL
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-4 text-xs">
@@ -431,6 +295,147 @@ export default function NetworkMetrics() {
               <span className="text-zinc-400">Download</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Additional Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Client-Perceived TTFB per Segment */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-zinc-100">Client-Perceived TTFB per Segment</h3>
+            <div className="flex items-center space-x-2">
+              <Signal className="w-4 h-4 text-gray-400" />
+              <span className="text-xs text-gray-400">Last 15 segments</span>
+            </div>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={segmentTTFBData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
+                <XAxis
+                  dataKey="segment"
+                  tick={{ fill: "currentColor" }}
+                  className="text-zinc-400"
+                />
+                <YAxis
+                  tick={{ fill: "currentColor" }}
+                  className="text-zinc-400"
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <ReferenceLine 
+                  y={50} 
+                  stroke="#ef4444" 
+                  strokeDasharray="5 5"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="ttfb"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name="TTFB"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Throughput Over Time */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-zinc-100">Throughput Over Time</h3>
+            <span className="text-xs text-gray-400">5 min window</span>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={throughputData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
+                <XAxis
+                  dataKey="time"
+                  tick={{ fill: "currentColor" }}
+                  className="text-zinc-400"
+                />
+                <YAxis
+                  tick={{ fill: "currentColor" }}
+                  className="text-zinc-400"
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <ReferenceLine 
+                  y={8} 
+                  stroke="#f59e0b" 
+                  strokeDasharray="5 5"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="throughput"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={false}
+                  name="Throughput"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Sample Request Timeline */}
+      <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+        <h4 className="text-sm font-semibold text-zinc-100 mb-4">Sample Request Timeline</h4>
+        <div className="space-y-3">
+          {sampleRequests.map((item, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-medium text-zinc-100 font-mono">{item.resource}</span>
+                <span className="text-xs text-gray-400">{item.total}ms</span>
+              </div>
+              <div className="flex h-6 rounded overflow-hidden">
+                {item.dns > 0 && (
+                  <div
+                    className="bg-purple-500 flex items-center justify-center text-xs text-white"
+                    style={{ width: `${(item.dns / item.total) * 100}%` }}
+                    title={`DNS: ${item.dns}ms`}
+                  >
+                    {item.dns > 8 && "DNS"}
+                  </div>
+                )}
+                {item.tcp > 0 && (
+                  <div
+                    className="bg-blue-500 flex items-center justify-center text-xs text-white"
+                    style={{ width: `${(item.tcp / item.total) * 100}%` }}
+                    title={`TCP: ${item.tcp}ms`}
+                  >
+                    {item.tcp > 10 && "TCP"}
+                  </div>
+                )}
+                {item.tls > 0 && (
+                  <div
+                    className="bg-cyan-500 flex items-center justify-center text-xs text-white"
+                    style={{ width: `${(item.tls / item.total) * 100}%` }}
+                    title={`TLS: ${item.tls}ms`}
+                  >
+                    {item.tls > 10 && "TLS"}
+                  </div>
+                )}
+                <div
+                  className="bg-yellow-500 flex items-center justify-center text-xs text-white"
+                  style={{ width: `${(item.ttfb / item.total) * 100}%` }}
+                  title={`TTFB: ${item.ttfb}ms`}
+                >
+                  {item.ttfb > 5 && "TTFB"}
+                </div>
+                <div
+                  className="bg-green-500 flex items-center justify-center text-xs text-white"
+                  style={{ width: `${(item.download / item.total) * 100}%` }}
+                  title={`Download: ${item.download}ms`}
+                >
+                  DL
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

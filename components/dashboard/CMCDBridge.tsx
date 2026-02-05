@@ -161,262 +161,264 @@ export function CMCDBridge() {
         <Badge variant="outline" className="text-sm">CMCD/CMSD</Badge>
       </div>
 
-      {/* CMCD Telemetry Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Buffer Length</CardTitle>
-            <span className="text-xs text-muted-foreground">bl</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockCMCDData.bl}ms</div>
-            <p className="text-xs text-muted-foreground">Current buffer duration</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Buffer Starvation</CardTitle>
-            <span className="text-xs text-muted-foreground">bs</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockCMCDData.bs ? (
-                <span className="text-red-500">Active</span>
-              ) : (
-                <span className="text-green-500">Normal</span>
-              )}
+      {/* 2-COLUMN LAYOUT: CMCD (Client) | CMSD (Server) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* CMCD - Client Signals */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-100">CMCD - Client Signals</h3>
+              <p className="text-xs text-zinc-400 mt-1">Client-side telemetry data</p>
             </div>
-            <p className="text-xs text-muted-foreground">Starvation status</p>
-          </CardContent>
-        </Card>
+            <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/20">
+              Client
+            </Badge>
+          </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bitrate</CardTitle>
-            <span className="text-xs text-muted-foreground">br</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(mockCMCDData.br / 1000).toFixed(1)}M</div>
-            <p className="text-xs text-muted-foreground">Current rendition</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Throughput</CardTitle>
-            <span className="text-xs text-muted-foreground">mtp</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(mockCMCDData.mtp / 1000).toFixed(1)}M</div>
-            <p className="text-xs text-muted-foreground">Measured throughput</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Deadline</CardTitle>
-            <span className="text-xs text-muted-foreground">dl</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockCMCDData.dl}ms</div>
-            <p className="text-xs text-muted-foreground">Segment deadline</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Startup</CardTitle>
-            <span className="text-xs text-muted-foreground">su</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {mockCMCDData.su ? (
-                <span className="text-blue-500">Yes</span>
-              ) : (
-                <span className="text-gray-500">No</span>
-              )}
+          <div className="space-y-3">
+            {/* Buffer Length */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Buffer Length (bl)</span>
+                <span className="text-2xl font-bold text-zinc-100">{mockCMCDData.bl}ms</span>
+              </div>
+              <p className="text-xs text-zinc-500">Current buffer duration</p>
             </div>
-            <p className="text-xs text-muted-foreground">Startup phase</p>
-          </CardContent>
-        </Card>
 
-        <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Session ID</CardTitle>
-            <span className="text-xs text-muted-foreground">sid</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-mono break-all">{mockCMCDData.sid}</div>
-            <p className="text-xs text-muted-foreground mt-1">Unique session identifier</p>
-          </CardContent>
-        </Card>
+            {/* Buffer Starvation */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Buffer Starvation (bs)</span>
+                <span className={`text-2xl font-bold ${mockCMCDData.bs ? 'text-red-400' : 'text-green-400'}`}>
+                  {mockCMCDData.bs ? "Active" : "Normal"}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500">Starvation status</p>
+            </div>
+
+            {/* Bitrate */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Bitrate (br)</span>
+                <span className="text-2xl font-bold text-zinc-100">{(mockCMCDData.br / 1000).toFixed(1)}M</span>
+              </div>
+              <p className="text-xs text-zinc-500">Current rendition</p>
+            </div>
+
+            {/* Throughput */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Throughput (mtp)</span>
+                <span className="text-2xl font-bold text-zinc-100">{(mockCMCDData.mtp / 1000).toFixed(1)}M</span>
+              </div>
+              <p className="text-xs text-zinc-500">Measured throughput</p>
+            </div>
+
+            {/* Deadline */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Deadline (dl)</span>
+                <span className="text-2xl font-bold text-zinc-100">{mockCMCDData.dl}ms</span>
+              </div>
+              <p className="text-xs text-zinc-500">Segment deadline</p>
+            </div>
+
+            {/* Startup */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Startup (su)</span>
+                <span className={`text-2xl font-bold ${mockCMCDData.su ? 'text-blue-400' : 'text-zinc-400'}`}>
+                  {mockCMCDData.su ? "Yes" : "No"}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500">Startup phase</p>
+            </div>
+
+            {/* Session ID */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <span className="text-xs text-zinc-400 block mb-2">Session ID (sid)</span>
+              <span className="text-sm font-mono text-zinc-100 break-all">{mockCMCDData.sid}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* CMSD - Server Hints */}
+        <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-zinc-100">CMSD - Server Hints</h3>
+              <p className="text-xs text-zinc-400 mt-1">Server-provided optimization signals</p>
+            </div>
+            <Badge variant="outline" className="text-xs bg-green-500/10 text-green-400 border-green-500/20">
+              Server
+            </Badge>
+          </div>
+
+          <div className="space-y-3">
+            {/* Estimated Throughput */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Estimated Throughput (etp)</span>
+                <span className="text-2xl font-bold text-zinc-100">{(mockCMSDData.etp / 1000).toFixed(1)}M</span>
+              </div>
+              <p className="text-xs text-zinc-500">Server estimate</p>
+            </div>
+
+            {/* Max Bitrate */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Max Bitrate (mb)</span>
+                <span className="text-2xl font-bold text-zinc-100">{(mockCMSDData.mb / 1000).toFixed(1)}M</span>
+              </div>
+              <p className="text-xs text-zinc-500">Available maximum</p>
+            </div>
+
+            {/* Round-Trip Time */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-white/5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-400">Round-Trip Time (rtt)</span>
+                <span className="text-2xl font-bold text-zinc-100">{mockCMSDData.rtt}ms</span>
+              </div>
+              <p className="text-xs text-zinc-500">Network latency</p>
+            </div>
+
+            {/* Info Box */}
+            <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <h4 className="text-sm font-semibold text-green-400 mb-2">Server-Driven ABR</h4>
+              <p className="text-xs text-green-300/80">
+                CMSD headers enable the server to guide client ABR decisions based on real-time
+                network conditions and CDN capacity.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* CMSD Server Hints */}
-      <Card>
-        <CardHeader>
-          <CardTitle>CMSD Server Hints</CardTitle>
-          <CardDescription>Server-provided optimization signals</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Estimated Throughput</span>
-                <span className="text-xs text-muted-foreground">etp</span>
-              </div>
-              <div className="text-2xl font-bold">{(mockCMSDData.etp / 1000).toFixed(1)}M</div>
-              <p className="text-xs text-muted-foreground">Server estimate</p>
-            </div>
+      {/* Session Correlation Table (Full Width) */}
+      <div className="bg-gradient-to-br from-zinc-800/90 to-zinc-900/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/10">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-1">Session Correlation Table</h3>
+          <p className="text-sm text-zinc-400">CDN logs joined with client beacons via session ID</p>
+        </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Max Bitrate</span>
-                <span className="text-xs text-muted-foreground">mb</span>
-              </div>
-              <div className="text-2xl font-bold">{(mockCMSDData.mb / 1000).toFixed(1)}M</div>
-              <p className="text-xs text-muted-foreground">Available maximum</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Round-Trip Time</span>
-                <span className="text-xs text-muted-foreground">rtt</span>
-              </div>
-              <div className="text-2xl font-bold">{mockCMSDData.rtt}ms</div>
-              <p className="text-xs text-muted-foreground">Network latency</p>
-            </div>
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search by Session ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Session Correlation Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Session Correlation Table</CardTitle>
-          <CardDescription>CDN logs joined with client beacons via session ID</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Search and Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by Session ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterStatus("all")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  filterStatus === "all"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterStatus("matched")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  filterStatus === "matched"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                Matched
-              </button>
-              <button
-                onClick={() => setFilterStatus("mismatch")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  filterStatus === "mismatch"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                }`}
-              >
-                Mismatches
-              </button>
-            </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilterStatus("all")}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                filterStatus === "all"
+                  ? "bg-blue-500 text-white"
+                  : "bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800/50 border border-white/10"
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterStatus("matched")}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                filterStatus === "matched"
+                  ? "bg-green-500 text-white"
+                  : "bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800/50 border border-white/10"
+              }`}
+            >
+              Matched
+            </button>
+            <button
+              onClick={() => setFilterStatus("mismatch")}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                filterStatus === "mismatch"
+                  ? "bg-red-500 text-white"
+                  : "bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800/50 border border-white/10"
+              }`}
+            >
+              Mismatches
+            </button>
           </div>
+        </div>
 
-          {/* Results count */}
-          <div className="mb-4 text-sm text-muted-foreground">
-            Showing {filteredCorrelations.length} of {allCorrelations.length} sessions
-          </div>
+        {/* Results count */}
+        <div className="mb-4 text-sm text-zinc-400">
+          Showing {filteredCorrelations.length} of {allCorrelations.length} sessions
+        </div>
 
-          {/* Table */}
-          <div className="relative overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr className="border-b">
-                  <th className="text-left p-3 font-semibold">Session ID</th>
-                  <th className="text-left p-3 font-semibold">Timestamp</th>
-                  <th className="text-right p-3 font-semibold">CDN TTFB</th>
-                  <th className="text-right p-3 font-semibold">Client TTFB</th>
-                  <th className="text-right p-3 font-semibold">Buffer Level</th>
-                  <th className="text-right p-3 font-semibold">Bitrate</th>
-                  <th className="text-center p-3 font-semibold">Match Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCorrelations.map((row) => {
-                  const isMismatch = row.matchStatus === "mismatch";
-                  const ttfbDiff = Math.abs(row.clientTTFB - row.cdnTTFB);
-                  
-                  return (
-                    <tr 
-                      key={row.sid} 
-                      className={`border-b transition-colors hover:bg-muted/50 ${
-                        isMismatch ? "bg-red-50 dark:bg-red-950/20" : ""
-                      }`}
-                    >
-                      <td className="p-3 font-mono text-xs">{row.sid}</td>
-                      <td className="p-3 text-xs">
-                        {new Date(row.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td className={`p-3 text-right font-medium ${
-                        isMismatch && row.cdnTTFB < 50 ? "text-green-600 dark:text-green-400" : ""
-                      }`}>
-                        {row.cdnTTFB}ms
-                      </td>
-                      <td className={`p-3 text-right font-medium ${
-                        isMismatch && row.clientTTFB > 50 ? "text-red-600 dark:text-red-400" : ""
-                      }`}>
-                        {row.clientTTFB}ms
-                      </td>
-                      <td className="p-3 text-right">{row.bufferLevel}ms</td>
-                      <td className="p-3 text-right">{(row.bitrate / 1000).toFixed(1)}M</td>
-                      <td className="p-3 text-center">
-                        <Badge
-                          variant={row.matchStatus === "matched" ? "default" : "destructive"}
-                          className="text-xs"
-                        >
-                          {row.matchStatus}
-                          {isMismatch && ttfbDiff > 30 && ` (+${ttfbDiff}ms)`}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        {/* Table */}
+        <div className="relative overflow-x-auto rounded-lg border border-white/10">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-900/50">
+              <tr className="border-b border-white/10">
+                <th className="text-left p-3 font-semibold text-zinc-300">Session ID</th>
+                <th className="text-left p-3 font-semibold text-zinc-300">Timestamp</th>
+                <th className="text-right p-3 font-semibold text-zinc-300">CDN TTFB</th>
+                <th className="text-right p-3 font-semibold text-zinc-300">Client TTFB</th>
+                <th className="text-right p-3 font-semibold text-zinc-300">Buffer Level</th>
+                <th className="text-right p-3 font-semibold text-zinc-300">Bitrate</th>
+                <th className="text-center p-3 font-semibold text-zinc-300">Match Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCorrelations.map((row) => {
+                const isMismatch = row.matchStatus === "mismatch";
+                const ttfbDiff = Math.abs(row.clientTTFB - row.cdnTTFB);
+                
+                return (
+                  <tr 
+                    key={row.sid} 
+                    className={`border-b border-white/5 transition-colors hover:bg-zinc-800/50 ${
+                      isMismatch ? "bg-red-500/10" : ""
+                    }`}
+                  >
+                    <td className="p-3 font-mono text-xs text-zinc-300">{row.sid}</td>
+                    <td className="p-3 text-xs text-zinc-400">
+                      {new Date(row.timestamp).toLocaleTimeString()}
+                    </td>
+                    <td className={`p-3 text-right font-medium ${
+                      isMismatch && row.cdnTTFB < 50 ? "text-green-400" : "text-zinc-300"
+                    }`}>
+                      {row.cdnTTFB}ms
+                    </td>
+                    <td className={`p-3 text-right font-medium ${
+                      isMismatch && row.clientTTFB > 50 ? "text-red-400" : "text-zinc-300"
+                    }`}>
+                      {row.clientTTFB}ms
+                    </td>
+                    <td className="p-3 text-right text-zinc-300">{row.bufferLevel}ms</td>
+                    <td className="p-3 text-right text-zinc-300">{(row.bitrate / 1000).toFixed(1)}M</td>
+                    <td className="p-3 text-center">
+                      <Badge
+                        variant={row.matchStatus === "matched" ? "default" : "destructive"}
+                        className="text-xs"
+                      >
+                        {row.matchStatus}
+                        {isMismatch && ttfbDiff > 30 && ` (+${ttfbDiff}ms)`}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Mismatch explanation */}
-          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>Mismatch Detection:</strong> Rows highlighted in red indicate cases where CDN reports fast delivery (&lt;50ms TTFB) 
-              but the client experienced slow response (&gt;50ms TTFB). This suggests last-mile network issues, device performance problems, 
-              or client-side interference.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Mismatch explanation */}
+        <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <p className="text-sm text-yellow-300">
+            <strong>Mismatch Detection:</strong> Rows highlighted in red indicate cases where CDN reports fast delivery (&lt;50ms TTFB) 
+            but the client experienced slow response (&gt;50ms TTFB). This suggests last-mile network issues, device performance problems, 
+            or client-side interference.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

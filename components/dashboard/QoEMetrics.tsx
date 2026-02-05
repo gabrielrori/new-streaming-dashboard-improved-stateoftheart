@@ -14,6 +14,8 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
+import { Activity, TrendingUp, TrendingDown } from "lucide-react";
+import { DataSourceBadge } from "@/components/shared/DataSourceBadge";
 
 // Custom Tooltip Component
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,74 +73,104 @@ const errorData = [
   { type: "Other", count: 12, color: "#6b7280" },
 ];
 
-// Seek Latency Distribution
-const seekLatencyData = [
-  { range: "<100ms", count: 3200 },
-  { range: "100-200ms", count: 4500 },
-  { range: "200-500ms", count: 2100 },
-  { range: "500ms-1s", count: 680 },
-  { range: ">1s", count: 220 },
-];
-
 export default function QoEMetrics() {
   return (
     <div className="space-y-6">
+      {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-zinc-100">Quality of Experience Metrics</h2>
-        <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
-          Video.js VHS
-        </span>
+        <div className="flex items-center gap-3">
+          <Activity className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-bold text-zinc-100">Quality of Experience</h2>
+        </div>
+        <DataSourceBadge source="Video.js VHS" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* TTFF Distribution */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">TTFF Distribution</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Video.js VHS</span>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ttffData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
-                <XAxis
-                  dataKey="range"
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                />
-                <YAxis tick={{ fill: "currentColor" }} className="text-zinc-400" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="circle"
-                />
-                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Sessions" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 flex justify-around text-sm">
-            <div className="text-center">
-              <p className="text-gray-500 dark:text-gray-400">p50</p>
-              <p className="font-semibold text-zinc-100">720ms</p>
-            </div>
-            <div className="text-center">
-              <p className="text-gray-500 dark:text-gray-400">p95</p>
-              <p className="font-semibold text-zinc-100">2.1s</p>
-            </div>
-            <div className="text-center">
-              <p className="text-gray-500 dark:text-gray-400">p99</p>
-              <p className="font-semibold text-zinc-100">5.8s</p>
+      {/* TOP ROW: 3 Large Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* TTFF p50 */}
+        <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-sm font-medium text-zinc-400">TTFF p50</div>
+            <div className="flex items-center gap-1 text-green-400">
+              <TrendingDown className="w-4 h-4" />
+              <span className="text-xs">-8%</span>
             </div>
           </div>
+          <div className="text-4xl font-bold text-zinc-100 mb-1">1.2s</div>
+          <div className="text-xs text-zinc-500">Time to First Frame (median)</div>
         </div>
 
-        {/* Rebuffer Ratio Over Time */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Rebuffer Ratio Over Time</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Video.js VHS</span>
+        {/* Rebuffer Ratio */}
+        <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-sm font-medium text-zinc-400">Rebuffer Ratio</div>
+            <div className="flex items-center gap-1 text-green-400">
+              <TrendingDown className="w-4 h-4" />
+              <span className="text-xs">-12%</span>
+            </div>
           </div>
-          <div className="h-72">
+          <div className="text-4xl font-bold text-zinc-100 mb-1">1.2%</div>
+          <div className="text-xs text-zinc-500">Percentage of playback time buffering</div>
+        </div>
+
+        {/* Startup Failure */}
+        <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-sm font-medium text-zinc-400">Startup Failure</div>
+            <div className="flex items-center gap-1 text-red-400">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-xs">+3%</span>
+            </div>
+          </div>
+          <div className="text-4xl font-bold text-zinc-100 mb-1">0.3%</div>
+          <div className="text-xs text-zinc-500">Failed playback attempts</div>
+        </div>
+      </div>
+
+      {/* MIDDLE: TTFF Distribution (Full Width) */}
+      <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-zinc-100 mb-4">TTFF Distribution</h3>
+        <div className="min-h-80">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={ttffData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
+              <XAxis
+                dataKey="range"
+                tick={{ fill: "currentColor" }}
+                className="text-zinc-400"
+              />
+              <YAxis tick={{ fill: "currentColor" }} className="text-zinc-400" />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="circle"
+              />
+              <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Sessions" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4 flex justify-around text-sm border-t border-zinc-700 pt-4">
+          <div className="text-center">
+            <p className="text-gray-400">p50</p>
+            <p className="font-semibold text-zinc-100">720ms</p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-400">p95</p>
+            <p className="font-semibold text-zinc-100">2.1s</p>
+          </div>
+          <div className="text-center">
+            <p className="text-gray-400">p99</p>
+            <p className="font-semibold text-zinc-100">5.8s</p>
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM: 2 Charts Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Rebuffer Timeline */}
+        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6 h-[400px] flex flex-col">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-4">Rebuffer Timeline</h3>
+          <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={rebufferData}>
                 <defs>
@@ -160,16 +192,15 @@ export default function QoEMetrics() {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
+                  wrapperStyle={{ paddingTop: '10px' }}
                   iconType="line"
                 />
-                {/* Reference line for danger zone threshold */}
                 <ReferenceLine 
                   y={2} 
                   stroke="#ef4444" 
                   strokeDasharray="5 5"
                   label={{ 
-                    value: 'Danger Zone (>2%)', 
+                    value: 'Danger Zone', 
                     fill: '#ef4444',
                     fontSize: 12,
                     position: 'right'
@@ -186,71 +217,12 @@ export default function QoEMetrics() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-sm">
-            <p className="text-zinc-400">
-              Average: <span className="font-semibold text-zinc-100">1.36%</span>
-            </p>
-            <span className="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-              Below threshold
-            </span>
-          </div>
         </div>
 
-        {/* Startup Failure Rate */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Startup Failure Rate</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Video.js VHS</span>
-          </div>
-          <div className="flex items-center justify-center h-72">
-            <div className="relative w-48 h-48">
-              <svg className="transform -rotate-90 w-48 h-48">
-                <circle
-                  cx="96"
-                  cy="96"
-                  r="80"
-                  stroke="currentColor"
-                  strokeWidth="16"
-                  fill="transparent"
-                  className="text-gray-200 dark:text-gray-700"
-                />
-                <circle
-                  cx="96"
-                  cy="96"
-                  r="80"
-                  stroke="currentColor"
-                  strokeWidth="16"
-                  fill="transparent"
-                  strokeDasharray={`${2 * Math.PI * 80}`}
-                  strokeDashoffset={`${2 * Math.PI * 80 * (1 - 2.3 / 100)}`}
-                  className="text-green-500"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-bold text-zinc-100">2.3%</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">Failure Rate</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-zinc-400">Total Attempts</span>
-              <span className="font-medium text-zinc-100">12,456</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-zinc-400">Failed</span>
-              <span className="font-medium text-red-600 dark:text-red-400">287</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Player Error Breakdown */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Player Error Breakdown</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Video.js VHS</span>
-          </div>
-          <div className="h-72">
+        {/* Error Breakdown */}
+        <div className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-lg shadow-lg p-6 h-[400px] flex flex-col">
+          <h3 className="text-lg font-semibold text-zinc-100 mb-4">Error Breakdown</h3>
+          <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={errorData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
@@ -263,7 +235,7 @@ export default function QoEMetrics() {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
+                  wrapperStyle={{ paddingTop: '10px' }}
                   iconType="square"
                 />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Error Count">
@@ -274,39 +246,6 @@ export default function QoEMetrics() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-4 text-sm text-zinc-400">
-            Total Errors: <span className="font-semibold text-zinc-100">380</span>
-          </p>
-        </div>
-
-        {/* Seek Latency Distribution */}
-        <div className="bg-zinc-800 rounded-lg shadow-lg p-6 border border-zinc-700 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-zinc-100">Seek Latency Distribution</h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Video.js VHS</span>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={seekLatencyData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-700" />
-                <XAxis
-                  dataKey="range"
-                  tick={{ fill: "currentColor" }}
-                  className="text-zinc-400"
-                />
-                <YAxis tick={{ fill: "currentColor" }} className="text-zinc-400" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="circle"
-                />
-                <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Seeks" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="mt-4 text-sm text-zinc-400">
-            Median Seek Latency: <span className="font-semibold text-zinc-100">180ms</span>
-          </p>
         </div>
       </div>
     </div>
