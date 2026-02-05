@@ -184,6 +184,7 @@ export function PlayerHealth() {
   };
 
   const errorRate = ((vhsStats.errored / vhsStats.requests) * 100).toFixed(2);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const abortRate = ((vhsStats.aborted / vhsStats.requests) * 100).toFixed(2);
 
   // Calculate health score (0-100, weighted)
