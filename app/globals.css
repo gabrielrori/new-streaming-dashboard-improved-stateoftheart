@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Zinc-based dark theme */
+  --background: #09090b; /* zinc-950 */
+  --foreground: #fafafa; /* zinc-50 */
+  
+  /* Card colors */
+  --card: #27272a; /* zinc-800 */
+  --card-foreground: #fafafa;
+  --card-border: #3f3f46; /* zinc-700 */
+  
+  /* Text hierarchy */
+  --text-primary: #fafafa; /* zinc-100 */
+  --text-secondary: #a1a1aa; /* zinc-400 */
+  --text-tertiary: #71717a; /* zinc-500 */
+  
+  /* Status colors */
+  --success: #10b981; /* emerald-500 */
+  --error: #f43f5e; /* rose-500 */
+  --warning: #f59e0b; /* amber-500 */
+  --info: #0ea5e9; /* sky-500 */
+  
+  /* Chart gradients */
+  --gradient-start-opacity: 0.8;
+  --gradient-end-opacity: 0.1;
+  
+  /* Borders & dividers */
+  --border: #3f3f46; /* zinc-700 */
+  --divider: #27272a; /* zinc-800 */
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Fade-in animation for sections */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
